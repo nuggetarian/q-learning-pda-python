@@ -17,6 +17,7 @@ class DarkEmperor(Robot): #Create a Robot
     num_states = 3
     num_actions = 4
     last_state = 0
+    reward = 100
 
     # Initialize the Q-table with zeros
     q_table = np.zeros((num_states, num_actions))
@@ -34,10 +35,9 @@ class DarkEmperor(Robot): #Create a Robot
 
         self.lockRadar("gun")
         self.setRadarField("thin")
-        self.loadQTable()
-        
 
     def run(self):
+        self.loadQTable()
         
         self.gunTurn(90)
 
@@ -49,8 +49,9 @@ class DarkEmperor(Robot): #Create a Robot
         print(action)
 
         # # TODO
-        reward = self.getReward(state, action)       
-        self.updateQValue(state, action, reward)
+        # reward = self.getReward(state, action)  
+        print("Reward:" + str(self.reward))     
+        self.updateQValue(state, action, self.reward)
 
         self.ctr = self.ctr + 1
         if self.ctr % 2 == 0:
@@ -61,6 +62,7 @@ class DarkEmperor(Robot): #Create a Robot
         pass
 
     def onHitWall(self):
+        self.reward = self.reward -10
         self.move(-20)
 
     def sensors(self): 
@@ -70,13 +72,13 @@ class DarkEmperor(Robot): #Create a Robot
         pass
         
     def onHitByRobot(self, robotId, robotName):
-        pass
+        self.reward = self.reward -10
 
     def onHitByBullet(self, bulletBotId, bulletBotName, bulletPower):
         pass
         
     def onBulletHit(self, botId, bulletId):
-        pass
+        self.reward = self.reward + 10
         
     def onBulletMiss(self, bulletId):
         pass
@@ -85,6 +87,7 @@ class DarkEmperor(Robot): #Create a Robot
         pass
         
     def onTargetSpotted(self, botId, botName, botPos):
+        self.reward = self.reward + 10
         pos = self.getPosition()
         dx = botPos.x() - pos.x()
         dy = botPos.y() - pos.y()
@@ -107,8 +110,8 @@ class DarkEmperor(Robot): #Create a Robot
         return 1
 
     # TODO, mozno spravit stylom, ze sa reward bude ukladat do vsetkych onbullethit, onbulletmiss... ale state neviem
-    def getReward(self, state, action):
-        return 1 # Placeholder
+    # def getReward(self, state, action):
+    #     return 1 # Placeholder
 
     # TODO sposobuje error.
     def updateQValue(self, state, action, reward):
@@ -117,6 +120,7 @@ class DarkEmperor(Robot): #Create a Robot
         old_value = self.q_table[self.last_state][action]
         next_max = np.max(self.q_table[state][action])
         
+        # new_value = ((1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max))/100
         new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
         self.q_table[state][action] = new_value
 
