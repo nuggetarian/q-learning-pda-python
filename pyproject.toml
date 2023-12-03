@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "robot"
+version = "0.1.0"
+description = ""
+authors = ["Oliver Bielik <xbieli10@vutbr.cz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PyQt5 = "^5.15.10"
+numpy = "^1.26.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
