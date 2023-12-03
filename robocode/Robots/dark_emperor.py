@@ -35,28 +35,27 @@ class DarkEmperor(Robot): #Create a Robot
         self.lockRadar("gun")
         self.setRadarField("thin")
         self.loadQTable()
+        
 
     def run(self):
+        
         self.gunTurn(90)
 
         state = self.getState()
         action = self.selectAction(state)
         self.performAction(action)
 
-        # TODO
-        reward = self.getReward(state, action)
-        print(self.q_table)
-        # self.updateQValue(state, action, reward)
+        print(state)
+        print(action)
+
+        # # TODO
+        reward = self.getReward(state, action)       
+        self.updateQValue(state, action, reward)
 
         self.ctr = self.ctr + 1
-        if self.ctr == 25:
+        if self.ctr % 2 == 0:
+            print("Saving QTable")
             self.saveQTable()
-        if self.ctr == 50:
-            self.saveQTable()
-        if self.ctr == 75:
-            self.saveQTable()
-        if self.ctr == 100:
-            self.saveQTable()    
 
     def sensors(self):  #NECESARY FOR THE GAME
         pass
@@ -105,7 +104,7 @@ class DarkEmperor(Robot): #Create a Robot
 
     # TODO
     def getState(self):
-        state = 0
+        return 1
 
     # TODO, mozno spravit stylom, ze sa reward bude ukladat do vsetkych onbullethit, onbulletmiss... ale state neviem
     def getReward(self, state, action):
@@ -113,13 +112,19 @@ class DarkEmperor(Robot): #Create a Robot
 
     # TODO sposobuje error.
     def updateQValue(self, state, action, reward):
-        print("USING OLD VALUE")
-        print("This is the last state:" + str(self.last_state) + "\nThis is the action:" + str(action))
+        # print("USING OLD VALUE")
+        # print("This is the last state:" + str(self.last_state) + "\nThis is the action:" + str(action))
         old_value = self.q_table[self.last_state][action]
-        next_max = np.argmax(self.q_table[state][action])
+        next_max = np.max(self.q_table[state][action])
         
         new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
         self.q_table[state][action] = new_value
+
+        # old_value = self.q_table[0][1]
+        # next_max = np.max(self.q_table[0][1])
+        
+        # new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
+        # self.q_table[0][1] = new_value
 
     def performAction(self, action):
         if action == 0:
@@ -134,7 +139,6 @@ class DarkEmperor(Robot): #Create a Robot
     def selectAction(self, state):
         if random.uniform(0, 1) < self.epsilon:
             action = random.randint(0, 3)
-            self.last_state = state
             return action
         else:
             best_action = np.argmax(self.q_table[state])
