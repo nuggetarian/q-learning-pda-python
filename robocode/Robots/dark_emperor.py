@@ -3,16 +3,15 @@ import math
 import random
 
 from Objects.robot import Robot
-from Objects.graph import Graph
 
-FIRE_DISTANCE = 500
+FIRE_DISTANCE = 1000
 BULLET_POWER = 2
 
 class DarkEmperor(Robot): #Create a Robot
 
     alpha = 0.1
     gamma = 0.6
-    epsilon = 0.1
+    epsilon = 0.3
     ctr = 1
     num_states = 7
     num_actions = 4
@@ -44,7 +43,6 @@ class DarkEmperor(Robot): #Create a Robot
         self.gunTurn(90)
 
         state = self.state
-        state = self.state
         action = self.selectAction(state)
         self.performAction(action)
 
@@ -71,7 +69,7 @@ class DarkEmperor(Robot): #Create a Robot
             self.reward = self.reward - 0
         
         self.state = 0
-        #self.move(-20)
+        # self.move(-20)
         self.move(-random.randrange(10,20))
 
     def sensors(self): 
@@ -82,6 +80,9 @@ class DarkEmperor(Robot): #Create a Robot
             self.reward = self.reward - 5
         else:
             self.reward = self.reward - 0
+        
+        self.turn(random.randrange(1,50))
+        self.move(random.randrange(1,20))
 
         self.state = 1
         
@@ -90,6 +91,9 @@ class DarkEmperor(Robot): #Create a Robot
             self.reward = self.reward - 5
         else:
             self.reward = self.reward - 0
+
+        self.turn(random.randrange(1,50))
+        self.move(random.randrange(1,20))    
         
         self.state = 2
 
@@ -99,6 +103,9 @@ class DarkEmperor(Robot): #Create a Robot
             self.reward = self.reward - 5
         else:
             self.reward = self.reward - 0
+
+        self.turn(random.randrange(1,50))
+        self.move(random.randrange(1,20))
         
         self.state = 3
         
@@ -149,7 +156,7 @@ class DarkEmperor(Robot): #Create a Robot
 
         dist = math.sqrt(dx**2 + dy**2)
         if dist < FIRE_DISTANCE:
-            self.fire(BULLET_POWER)  
+            self.fire(BULLET_POWER) 
 
     # TODO
     def getState(self):
@@ -164,12 +171,14 @@ class DarkEmperor(Robot): #Create a Robot
         
         # new_value = ((1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max))/100
         new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
-
+        
         if new_value < 10:
             new_value = new_value/10
         elif new_value > 10:
             new_value = new_value/100
-
+        elif new_value > 100:
+            new_value = new_value/1000
+        
         self.q_table[state][action] = new_value
 
         # old_value = self.q_table[0][1]
