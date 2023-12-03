@@ -14,10 +14,11 @@ class DarkEmperor(Robot): #Create a Robot
     gamma = 0.6
     epsilon = 0.1
     ctr = 1
-    num_states = 3
+    num_states = 7
     num_actions = 4
     last_state = 0
     reward = 100
+    state = 6
 
     # Initialize the Q-table with zeros
     q_table = np.zeros((num_states, num_actions))
@@ -41,7 +42,7 @@ class DarkEmperor(Robot): #Create a Robot
         
         self.gunTurn(90)
 
-        state = self.getState()
+        state = self.state
         action = self.selectAction(state)
         self.performAction(action)
 
@@ -62,32 +63,75 @@ class DarkEmperor(Robot): #Create a Robot
         pass
 
     def onHitWall(self):
-        self.reward = self.reward -10
-        self.move(-20)
+        if self.reward > 0 and self.reward - 5 >= 0:
+            self.reward = self.reward - 5
+        else:
+            self.reward = self.reward - 0
+        
+        self.state = 0
+        #self.move(-20)
+        self.move(-random.randrange(10,20))
 
     def sensors(self): 
         pass
         
     def onRobotHit(self, robotId, robotName):
-        pass
+        if self.reward > 0 and self.reward - 5 >= 0:
+            self.reward = self.reward - 5
+        else:
+            self.reward = self.reward - 0
+
+        self.state = 1
         
     def onHitByRobot(self, robotId, robotName):
-        self.reward = self.reward -10
+        if self.reward > 0 and self.reward - 5 >= 0:
+            self.reward = self.reward - 5
+        else:
+            self.reward = self.reward - 0
+        
+        self.state = 2
+
 
     def onHitByBullet(self, bulletBotId, bulletBotName, bulletPower):
-        pass
+        if self.reward > 0 and self.reward - 5 >= 0:
+            self.reward = self.reward - 5
+        else:
+            self.reward = self.reward - 0
         
+        self.state = 3
+        
+    
     def onBulletHit(self, botId, bulletId):
-        self.reward = self.reward + 10
+        if self.reward < 100 and self.reward + 10 <= 100:
+            self.reward = self.reward + 10
+        else:
+            self.reward = self.reward + 0
+        
+        self.state = 4
         
     def onBulletMiss(self, bulletId):
-        pass
+        if self.reward > 0 and self.reward - 5 >= 0:
+            self.reward = self.reward - 5
+        else:
+            self.reward = self.reward - 0
+        
+        self.state = 5
         
     def onRobotDeath(self):
-        pass
+        if self.reward > 0 and self.reward - 10 >= 0:
+            self.reward = self.reward - 10
+        else:
+            self.reward = self.reward - 0
+        
         
     def onTargetSpotted(self, botId, botName, botPos):
-        self.reward = self.reward + 10
+        if self.reward < 100 and self.reward + 5 <= 100:
+            self.reward = self.reward + 5
+        else:
+            self.reward = self.reward + 0
+        
+        self.state = 6
+
         pos = self.getPosition()
         dx = botPos.x() - pos.x()
         dy = botPos.y() - pos.y()
@@ -105,10 +149,6 @@ class DarkEmperor(Robot): #Create a Robot
         if dist < FIRE_DISTANCE:
             self.fire(BULLET_POWER)  
 
-    # TODO
-    def getState(self):
-        return 1
-
     # TODO, mozno spravit stylom, ze sa reward bude ukladat do vsetkych onbullethit, onbulletmiss... ale state neviem
     # def getReward(self, state, action):
     #     return 1 # Placeholder
@@ -122,6 +162,12 @@ class DarkEmperor(Robot): #Create a Robot
         
         # new_value = ((1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max))/100
         new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
+
+        if new_value < 10:
+            new_value = new_value/10
+        elif new_value > 10:
+            new_value = new_value/100
+
         self.q_table[state][action] = new_value
 
         # old_value = self.q_table[0][1]
