@@ -34,10 +34,10 @@ class DarkEmperor(Robot): #Create a Robot
 
         self.lockRadar("gun")
         self.setRadarField("thin")
+        self.loadQTable()
 
     def run(self):
-        self.loadQTable()
-        self.gunTurn(5)
+        self.gunTurn(90)
 
         state = self.getState()
         action = self.selectAction(state)
@@ -45,7 +45,8 @@ class DarkEmperor(Robot): #Create a Robot
 
         # TODO
         reward = self.getReward(state, action)
-        self.updateQValue(state, action, reward)
+        print(self.q_table)
+        # self.updateQValue(state, action, reward)
 
         self.ctr = self.ctr + 1
         if self.ctr == 25:
@@ -61,7 +62,7 @@ class DarkEmperor(Robot): #Create a Robot
         pass
 
     def onHitWall(self):
-        pass
+        self.move(-20)
 
     def sensors(self): 
         pass
@@ -108,16 +109,17 @@ class DarkEmperor(Robot): #Create a Robot
 
     # TODO, mozno spravit stylom, ze sa reward bude ukladat do vsetkych onbullethit, onbulletmiss... ale state neviem
     def getReward(self, state, action):
-        pass
+        return 1 # Placeholder
 
+    # TODO sposobuje error.
     def updateQValue(self, state, action, reward):
+        print("USING OLD VALUE")
+        print("This is the last state:" + str(self.last_state) + "\nThis is the action:" + str(action))
         old_value = self.q_table[self.last_state][action]
-        next_max = np.max(self.q_table[state][action])
+        next_max = np.argmax(self.q_table[state][action])
         
         new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
         self.q_table[state][action] = new_value
-
-        pass
 
     def performAction(self, action):
         if action == 0:
@@ -135,14 +137,7 @@ class DarkEmperor(Robot): #Create a Robot
             self.last_state = state
             return action
         else:
-            max_value = float("-inf")
-            best_action = 0
-
-            for action, value in enumerate(self.q_table[state]):
-                if value > max_value:
-                    max_value = value
-                    best_action = action  # Update the best action index
-                    self.last_state = state
+            best_action = np.argmax(self.q_table[state])
             return best_action
         
 
