@@ -4,9 +4,6 @@ import random
 
 from Objects.robot import Robot
 
-FIRE_DISTANCE = 1000
-BULLET_POWER = 2
-
 class DarkEmperor(Robot):
 
     alpha = 0.1
@@ -26,7 +23,6 @@ class DarkEmperor(Robot):
         self.setRadarColor(255, 60, 0)
         self.setBulletsColor(0, 200, 100)
         
-
         size = self.getMapSize()
         self.radarVisible(True)
 
@@ -34,9 +30,7 @@ class DarkEmperor(Robot):
         self.setRadarField("thin")
         self.loadQTable()
 
-    def run(self):
-        
-        
+    def run(self):      
         self.gunTurn(90)
 
         state = self.state
@@ -59,9 +53,6 @@ class DarkEmperor(Robot):
         
         self.state = 0
         self.move(-random.randrange(10,20))
-
-    def sensors(self): 
-        pass
         
     def onRobotHit(self, robotId, robotName):
         if self.reward > 0 and self.reward - 5 >= 0:
@@ -85,7 +76,6 @@ class DarkEmperor(Robot):
         
         self.state = 2
 
-
     def onHitByBullet(self, bulletBotId, bulletBotName, bulletPower):
         if self.reward > 0 and self.reward - 5 >= 0:
             self.reward = self.reward - 5
@@ -96,8 +86,7 @@ class DarkEmperor(Robot):
         self.move(random.randrange(1,20))
         
         self.state = 3
-        
-    
+           
     def onBulletHit(self, botId, bulletId):
         if self.reward < 100 and self.reward + 10 <= 100:
             self.reward = self.reward + 10
@@ -119,9 +108,9 @@ class DarkEmperor(Robot):
             self.reward = self.reward - 10
         else:
             self.reward = self.reward - 0
-        
-        
+    
     def onTargetSpotted(self, botId, botName, botPos):
+        POWER = 2
         if self.reward < 100 and self.reward + 5 <= 100:
             self.reward = self.reward + 5
         else:
@@ -129,23 +118,22 @@ class DarkEmperor(Robot):
         
         self.state = 6
 
-        pos = self.getPosition()
-        dx = botPos.x() - pos.x()
-        dy = botPos.y() - pos.y()
+        self.adjustGunAngle(botPos)
+        self.fire(POWER)
+
+    def adjustGunAngle(self, botPos):
+        my_position = self.getPosition()
+        dx = botPos.x() - my_position.x()
+        dy = botPos.y() - my_position.y()
 
         my_gun_angle = self.getGunHeading() % 360
         enemy_angle = math.degrees(math.atan2(dy, dx)) - 90
-        a = enemy_angle - my_gun_angle
-        if a < -180:
-            a += 360
-        elif 180 < a:
-            a -= 360
-        self.gunTurn(a)
-
-        dist = math.sqrt(dx**2 + dy**2)
-        if dist < FIRE_DISTANCE:
-            self.fire(BULLET_POWER) 
-
+        angle = enemy_angle - my_gun_angle
+        if angle < -180:
+            angle += 360
+        elif 180 < angle:
+            angle -= 360
+        self.gunTurn(angle)
 
     def updateQValue(self, state, action, reward):
         old_value = self.q_table[self.last_state][action]
@@ -162,7 +150,6 @@ class DarkEmperor(Robot):
         
         self.q_table[state][action] = new_value
 
-
     def performAction(self, action):
         if action == 0:
             self.move(100)
@@ -174,6 +161,7 @@ class DarkEmperor(Robot):
             self.move(-100)
 
     def selectAction(self, state):
+        self.last_state = state
         if random.uniform(0, 1) < self.epsilon:
             action = random.randint(0, 3)
             return action
@@ -181,7 +169,6 @@ class DarkEmperor(Robot):
             best_action = np.argmax(self.q_table[state])
             return best_action
         
-
     def saveQTable(self):
         with open('qtable.txt', 'w') as file:
             for row in self.q_table:
