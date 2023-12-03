@@ -35,13 +35,14 @@ class DarkEmperor(Robot): #Create a Robot
 
         self.lockRadar("gun")
         self.setRadarField("thin")
+        self.loadQTable()
 
     def run(self):
-        self.loadQTable()
+        
         
         self.gunTurn(90)
 
-        state = self.getState()
+        state = self.state
         action = self.selectAction(state)
         self.performAction(action)
 
@@ -109,10 +110,6 @@ class DarkEmperor(Robot): #Create a Robot
     def getState(self):
         return 1
 
-    # TODO, mozno spravit stylom, ze sa reward bude ukladat do vsetkych onbullethit, onbulletmiss... ale state neviem
-    # def getReward(self, state, action):
-    #     return 1 # Placeholder
-
     # TODO sposobuje error.
     def updateQValue(self, state, action, reward):
         # print("USING OLD VALUE")
@@ -156,10 +153,13 @@ class DarkEmperor(Robot): #Create a Robot
                 file.write(row_data + '\n')
     
     def loadQTable(self):
-        loaded_array = np.zeros((self.num_states, self.num_actions))
-        with open('qtable.txt', 'r') as file:
-            for line in file:
-                row = np.array([float(element) if '.' in element else int(element) for element in line.strip().split()])
-                self.q_table = np.vstack((self.q_table, row))
+        # loaded_array = np.zeros((self.num_states, self.num_actions))
+        # with open('qtable.txt', 'r') as file:
+        #     for line in file:
+        #         row = np.array([float(element) if '.' in element else int(element) for element in line.strip().split()])
+        #         self.q_table = np.vstack((self.q_table, row))
+
+        self.q_table = np.loadtxt('qtable.txt', dtype=float)
         
-        self.q_table = loaded_array
+        # self.q_table = loaded_array
+        print(self.q_table)
